@@ -1,0 +1,44 @@
+body {
+    margin: 20px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.avatar {
+    width: 200px;
+}
+
+.card {
+    width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    background: #EFEDE6;
+    color: #997b66;
+    border-bottom: 6px solid #FBF1EA ;
+    transition: background 0.5s, color 0.1s, border-bottom 0.5s;
+    
+}
+
+.card:hover{
+    background: #6b705c;
+    border-bottom: 10px solid #a5a58d;
+    color: #fefae0;
+}
+
+
+
+h1{
+    color: black;
+    font-size: 5rem;
+    font-family: "Space Mono", monospace;
+}
+
+p{
+    font-family: "Space Mono", monospace; 
+}
+
+a{
+    font-family: "Space Mono", monospace;
+}

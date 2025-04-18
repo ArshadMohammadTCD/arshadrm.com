@@ -1,69 +1,221 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Audio Player</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dissertation Audio Player</title>
   <style>
-    body {
-      font-family: Arial;
-      padding: 20px;
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #2980b9;
+      --background-color: #f5f7fa;
+      --card-background: #ffffff;
+      --text-color: #333333;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
     }
-    .folder {
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      padding: 30px;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
       margin-bottom: 40px;
     }
-    h2 {
-      margin-bottom: 10px;
+
+    h1 {
+      color: var(--primary-color);
+      margin-bottom: 15px;
+      font-size: 2.5rem;
     }
+
+    .subtitle {
+      color: #777;
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+
+    .folders-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+      gap: 30px;
+    }
+
+    .folder {
+      background-color: var(--card-background);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      box-shadow: var(--box-shadow);
+      transition: var(--transition);
+    }
+
+    .folder:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    h2 {
+      color: var(--primary-color);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 10px;
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+
+    .audio-item {
+      margin-bottom: 22px;
+    }
+
+    h3 {
+      margin-bottom: 8px;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+    }
+
+    h3::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
     audio {
-      display: block;
-      margin-bottom: 10px;
+      width: 100%;
+      border-radius: var(--border-radius);
+      background-color: #f0f3f7;
+      outline: none;
+    }
+
+    audio::-webkit-media-controls-panel {
+      background-color: #f0f3f7;
+    }
+
+    audio::-webkit-media-controls-play-button {
+      background-color: var(--primary-color);
+      border-radius: 50%;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 50px;
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    /* Color indicators for audio type */
+    .original h3::before { background-color: #2ecc71; }
+    .vocoded h3::before { background-color: #e74c3c; }
+    .reconstruction h3::before { background-color: #f39c12; }
+
+    @media (max-width: 768px) {
+      .folders-container {
+        grid-template-columns: 1fr;
+      }
+      body {
+        padding: 15px;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <header>
+      <h1>Audio Comparison Player</h1>
+      <p class="subtitle"></p>
+    </header>
 
-  <div class="folder" id="folder4">
-    <h2>Subject 4</h2>
-    <h3>Original</h3>
-    <audio controls src="4/original4.wav"></audio>
-    <h3>Perfect Vocoding</h3>
-    <audio controls src="4/vocoded4.wav"></audio>
-    <h3>Reconstruction</h3>
-    <audio controls src="4/reconstruction4.wav"></audio>
-    <!-- Add more as needed -->
+    <div class="folders-container">
+      <div class="folder" id="folder4">
+        <h2>Subject 4</h2>
+        <div class="audio-item original">
+          <h3>Original</h3>
+          <audio controls src="4/original4.wav"></audio>
+        </div>
+        <div class="audio-item vocoded">
+          <h3>Perfect Vocoding</h3>
+          <audio controls src="4/vocoded4.wav"></audio>
+        </div>
+        <div class="audio-item reconstruction">
+          <h3>Reconstruction</h3>
+          <audio controls src="4/reconstruction4.wav"></audio>
+        </div>
+      </div>
+
+      <div class="folder" id="folder5">
+        <h2>Subject 5</h2>
+        <div class="audio-item original">
+          <h3>Original</h3>
+          <audio controls src="5/original5.wav"></audio>
+        </div>
+        <div class="audio-item vocoded">
+          <h3>Perfect Vocoding</h3>
+          <audio controls src="5/vocoded5.wav"></audio>
+        </div>
+        <div class="audio-item reconstruction">
+          <h3>Reconstruction</h3>
+          <audio controls src="5/reconstruction5.wav"></audio>
+        </div>
+      </div>
+
+      <div class="folder" id="folder6">
+        <h2>Subject 6</h2>
+        <div class="audio-item original">
+          <h3>Original</h3>
+          <audio controls src="6/original6.wav"></audio>
+        </div>
+        <div class="audio-item vocoded">
+          <h3>Perfect Vocoding</h3>
+          <audio controls src="6/vocoded6.wav"></audio>
+        </div>
+        <div class="audio-item reconstruction">
+          <h3>Reconstruction</h3>
+          <audio controls src="6/reconstruction6.wav"></audio>
+        </div>
+      </div>
+
+      <div class="folder" id="folder8">
+        <h2>Subject 8</h2>
+        <div class="audio-item original">
+          <h3>Original</h3>
+          <audio controls src="8/original8.wav"></audio>
+        </div>
+        <div class="audio-item vocoded">
+          <h3>Perfect Vocoding</h3>
+          <audio controls src="8/vocoded8.wav"></audio>
+        </div>
+        <div class="audio-item reconstruction">
+          <h3>Reconstruction</h3>
+          <audio controls src="8/reconstruction8.wav"></audio>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>© 2025 Arshad Rehman Mohammed</p>
+    </footer>
   </div>
 
-  <div class="folder" id="folder5">
-    <h2>Subject 5</h2>
-    <h3>Original</h3>
-    <audio controls src="5/original5.wav"></audio>
-    <h3>Perfect Vocoding</h3>
-    <audio controls src="5/vocoded5.wav"></audio>
-    <h3>Reconstruction</h3>
-    <audio controls src="5/reconstruction5.wav"></audio>
-    <!-- Add more as needed -->
-  </div>
-
-  <div class="folder" id="folder6">
-    <h2>Subject 6</h2>
-    <h3>Original</h3>
-    <audio controls src="6/original6.wav"></audio>
-    <h3>Perfect Vocoding</h3>
-    <audio controls src="6/vocoded6.wav"></audio>
-    <h3>Reconstruction</h3>
-    <audio controls src="6/reconstruction6.wav"></audio>
-    <!-- Add more as needed -->
-  </div>
-
-  <div class="folder" id="folder8">
-    <h2>Folder 8</h2>
-    <h3>Original</h3>
-    <audio controls src="8/original8.wav"></audio>
-    <h3>Perfect Vocoding</h3>
-    <audio controls src="8/vocoded8.wav"></audio>
-    <h3>Reconstruction</h3>
-    <audio controls src="8/reconstruction8.wav"></audio>
-    <!-- Add more as needed -->
-  </div>
-
+  <script>
+    // Optional: Add functionality to play all buttons in a category
+    document.addEventListener('DOMContentLoaded', function() {
+      // You could add interactive features here if needed
+    });
+  </script>
 </body>
 </html>

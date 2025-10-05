@@ -1,0 +1,186 @@
+<!--
+Simple single-file birthday card webpage
+How to use:
+ 1. Save this file as `birthday_card.html` on your computer.
+ 2. Send it to your phone (email, messaging app, AirDrop, Google Drive).
+ 3. Open the file in your phone's browser (Chrome/Safari) — it works offline.
+
+Features:
+ - Mobile-first responsive layout
+ - Tap to reveal a message / play a short melody
+ - Light confetti animation
+ - Customizable recipient name (edit the `recipientName` variable)
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Happy Birthday 🎉</title>
+  <style>
+    :root{--bg:#0f172a;--card:#0b1220;--accent:#ff7aa2;--muted:#9aa4b2}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--bg),#081024);color:#fff;padding:20px}
+    .card{width:100%;max-width:520px;background:linear-gradient(180deg,rgba(129, 1, 0, 0.2),rgba(129, 0, 1, 0.2 ));border-radius:18px;padding:22px;box-shadow:0 10px 30px rgba(2,6,23,0.6);position:relative;overflow:hidden}
+    h1{margin:0;font-size:2.2rem;letter-spacing:-0.02em}
+    p.lead{color:var(--muted);margin:8px 0 18px}
+    .big-emoji{font-size:3.8rem;margin:10px 0}
+
+    .btn{display:inline-block;padding:12px 18px;border-radius:12px;background:linear-gradient(90deg,var(--accent),#ffb86b);color:#071028;font-weight:700;text-decoration:none;box-shadow:0 6px 18px rgba(255,122,162,0.12);border:none}
+    .controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;   /* centers horizontally */
+        align-items: center;       /* centers vertically within the row */
+        text-align: center;        /* ensures inline alignment when wrapping */
+        margin-top: 12px;
+    }
+
+    .message{margin-top:18px;background:rgba(255,255,255,0.02);padding:14px;border-radius:12px;min-height:64px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;text-align:center;white-space:pre-line}
+    .small{font-size:0.9rem;color:var(--muted);justify-content:center;margin-top:12px; margin-bottom: 12px;}
+
+    /* Confetti canvas covers card */
+    #confetti{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+
+    /* responsive tweaks */
+    @media (max-width:380px){h1{font-size:1.6rem}.big-emoji{font-size:3rem}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <canvas id="confetti"></canvas>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="width:64px;height:64px;border-radius:14px;background:linear-gradient(180deg,#fff0,#fff0);display:flex;align-items:center;justify-content:center;font-size:1.6rem">
+      </div>
+      <div>
+        <h1 id="title">Happy Birthday Tsundeley! </h1>
+        <div class="small" id="subtitle"></div>
+      </div>
+    </div>
+
+    <!-- <div class="big-emoji" id="bigEmoji">👨‍🦲</div> -->
+
+    <div class="controls">
+      <button id="revealBtn" class="btn">Tap to Reveal Message</button>
+      <!-- <button id="songBtn" class="btn">Play a Melody</button> -->
+    </div>
+
+    <div class="message" id="message">Tap "Reveal Message" to see a special note.</div>
+    <div class="small"></div>
+  </div>
+
+  <script>
+    // --- Customize the recipient here ---
+    const recipientName = 'Tsundeley'; // change this to the person's name
+    // ------------------------------------
+
+    const title = document.getElementById('title');
+    const subtitle = document.getElementById('subtitle');
+    const bigEmoji = document.getElementById('bigEmoji');
+    const message = document.getElementById('message');
+    const revealBtn = document.getElementById('revealBtn');
+    const songBtn = document.getElementById('songBtn');
+
+    title.textContent = `Happy Birthday, ${recipientName}👵!`;
+    subtitle.textContent = 'Old hags deserve something nice too, A digital card for your chronically online 20 year old ahh';
+
+    // Reveal message animation
+    const messages = [
+      `Congrats on becoming 20` ,
+      `now you are basically (Pushing 30)`,
+      `and basically the same age as me (Also pushing 30)`,
+      `Bald Fuck`,
+      `Loser`,
+      `Male Coded Emotionally Reserved Ahh`,
+      `Baldina Ahh`,
+      `164cm short ahh`,
+      `im just a girl ahh`,
+      `freaky ahh`,
+      `A nicer message will be sent on discord`,
+        `Maybe`,
+        `Depending on my mood`,
+        `Type Shit`
+    ];
+    let shown = false;
+    revealBtn.addEventListener('click', ()=>{
+      if(shown) return; shown = true;
+      message.textContent = '';
+      let idx = 0;
+      const interval = setInterval(()=>{
+        if(idx >= messages.length){ clearInterval(interval); message.textContent = `${messages.join('\n\n')}\n\nWith love, Arshad`; return; }
+        message.textContent += messages[idx] + '\n\n';
+        idx += 1;
+      }, 1200);
+      burstConfetti();
+      bigEmoji.classList.add('pop');
+    });
+
+    // Simple WebAudio melody (no files)
+    songBtn.addEventListener('click', async ()=>{
+      playMelody();
+    });
+
+    function playMelody(){
+      try{
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [440, 440, 0, 440, 0, 349, 440, 0, 523]; // simple pattern
+        let t = ctx.currentTime;
+        notes.forEach((freq,i)=>{
+          if(freq>0){
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.frequency.value = freq;
+            o.type = 'sine';
+            g.gain.value = 0.09;
+            o.connect(g); g.connect(ctx.destination);
+            o.start(t + i*0.22);
+            o.stop(t + i*0.22 + 0.18);
+          }
+        });
+      }catch(e){ alert('Audio not supported on this device.'); }
+    }
+
+    // --- Confetti ---
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    function resize(){ canvas.width = canvas.clientWidth * devicePixelRatio; canvas.height = canvas.clientHeight * devicePixelRatio; ctx.scale(devicePixelRatio, devicePixelRatio); }
+    window.addEventListener('resize', resize); resize();
+
+    const particles = [];
+    function createParticle(x,y){
+      const colors = ['#ff7aa2','#ffd27a','#7ae3ff','#9affc9','#c9a7ff'];
+      const p = {
+        x, y, vx: (Math.random()-0.5)*4, vy: -Math.random()*6 - 2,
+        size: Math.random()*8 + 6, color: colors[Math.floor(Math.random()*colors.length)], life: 70 + Math.random()*30
+      };
+      particles.push(p);
+    }
+
+    function burstConfetti(){
+      const rect = canvas.getBoundingClientRect();
+      const x = rect.width / 2; const y = rect.height / 3;
+      for(let i=0;i<80;i++) createParticle(x + (Math.random()-0.5)*160, y + (Math.random()-0.5)*40);
+    }
+
+    function update(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.vy += 0.18; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.life -= 1;
+        ctx.beginPath(); ctx.fillStyle = p.color; ctx.rect(p.x, p.y, p.size, p.size*0.6); ctx.fill();
+        if(p.life <= 0 || p.y > canvas.clientHeight + 40) particles.splice(i,1);
+      }
+      requestAnimationFrame(update);
+    }
+    update();
+
+    // Small friendly auto-burst for first open
+    setTimeout(()=>{ burstConfetti(); }, 700);
+
+    // Allow tapping the big emoji to toggle one more surprise
+    bigEmoji.addEventListener('click', ()=>{ bigEmoji.textContent = bigEmoji.textContent === '🎉' ? '💖' : '🎉'; burstConfetti(); });
+  </script>
+</body>
+</html>

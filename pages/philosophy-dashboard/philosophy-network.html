@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philosophy Profile Network</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --bg: #faf9f6;
+  --bg2: #f0eee9;
+  --bg3: #e6e3dc;
+  --text: #1a1a18;
+  --text2: #6b6960;
+  --text3: #9e9b90;
+  --border: rgba(0,0,0,0.08);
+  --green: #1D9E75;
+  --purple: #7F77DD;
+  --blue: #3B8BD4;
+  --coral: #D85A30;
+  --gray: #888780;
+  --red: #E24B4A;
+  --leaf: #639922;
+  --pink: #D4537E;
+  --teal: #0F6E56;
+  --amber: #BA7517;
+  --deepurple: #534AB7;
+  --rose: #993556;
+  --yellow: #EF9F27;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1a18;
+    --bg2: #252521;
+    --bg3: #333330;
+    --text: #e8e6df;
+    --text2: #9e9b90;
+    --text3: #6b6960;
+    --border: rgba(255,255,255,0.08);
+  }
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: var(--text2);
+  font-size: 15px;
+  margin-bottom: 36px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 32px;
+  background: var(--bg2);
+  border-radius: var(--radius);
+  padding: 4px;
+  width: fit-content;
+}
+
+.tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.tab:hover { color: var(--text); }
+
+.tab.active {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Network panel */
+.graph-container {
+  background: var(--bg2);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.graph-controls {
+  display: flex; gap: 12px; align-items: center;
+  margin-bottom: 16px; flex-wrap: wrap;
+}
+
+.graph-controls label {
+  font-size: 12px; color: var(--text2);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.graph-controls select, .graph-controls input[type="range"] {
+  font-family: inherit; font-size: 12px;
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: 6px; padding: 4px 8px; color: var(--text);
+}
+
+.graph-controls input[type="range"] { width: 100px; }
+
+.legend-bar {
+  display: flex; gap: 16px; justify-content: center;
+  padding: 12px 0 4px; font-size: 11px; color: var(--text2); flex-wrap: wrap;
+}
+
+.legend-bar span { display: flex; align-items: center; gap: 4px; }
+.legend-bar .sw { height: 4px; border-radius: 2px; display: inline-block; }
+
+/* Matrix panel */
+.matrix-wrap { overflow-x: auto; margin-top: 8px; }
+
+.matrix {
+  border-collapse: collapse; width: 100%; font-size: 12px;
+  min-width: 600px;
+}
+
+.matrix th {
+  padding: 8px 6px; color: var(--text2); font-weight: 500;
+  text-align: center; font-size: 11px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--bg);
+}
+
+.matrix th:first-child { text-align: left; }
+
+.matrix td {
+  padding: 8px 6px; text-align: center;
+  border-bottom: 0.5px solid var(--border);
+  font-variant-numeric: tabular-nums;
+}
+
+.matrix td.self { color: var(--text3); }
+.matrix tr:hover td { background: var(--bg2); }
+.matrix td.highlight { font-weight: 600; }
+
+/* Ranking panel */
+.rank-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 18px; border-radius: var(--radius-lg);
+  border: 0.5px solid var(--border); margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+
+.rank-card.top { border: 2px solid var(--green); }
+.rank-card .num {
+  font-size: 20px; font-weight: 600; min-width: 28px;
+  color: var(--text3); font-variant-numeric: tabular-nums;
+}
+
+.rank-card.top .num { color: var(--green); }
+.rank-card .info { flex: 1; }
+.rank-card .name { font-size: 15px; font-weight: 600; }
+.rank-card .detail { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+.rank-bar-wrap { display: flex; align-items: center; gap: 10px; min-width: 160px; }
+.rank-bar-bg { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.rank-bar-fill { height: 100%; border-radius: 3px; }
+.rank-pct { font-size: 20px; font-weight: 600; min-width: 56px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.focus-select {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+  font-size: 14px; color: var(--text2);
+}
+
+.focus-select select {
+  font-family: inherit; font-size: 14px;
+  background: var(--bg2); border: 0.5px solid var(--border);
+  border-radius: 8px; padding: 8px 14px; color: var(--text);
+}
+
+/* Radar panel */
+.radar-container {
+  background: var(--bg2); border-radius: var(--radius-lg);
+  padding: 24px; margin-bottom: 24px;
+}
+
+.radar-legend {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  justify-content: center; padding-top: 12px;
+  font-size: 11px; color: var(--text2);
+}
+
+.radar-legend span { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.radar-legend .dot { width: 10px; height: 10px; border-radius: 2px; }
+
+/* Method box */
+.method-box {
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 16px 20px; margin-bottom: 24px;
+  font-size: 13px; color: var(--text2); line-height: 1.7;
+}
+
+.method-box strong { color: var(--text); }
+.method-box code {
+  font-family: 'DM Mono', monospace; font-size: 12px;
+  background: var(--bg3); padding: 2px 6px; border-radius: 4px;
+}
+
+/* Add profile section */
+.add-section {
+  background: var(--bg2); border-radius: var(--radius-lg);
+  padding: 24px; margin-top: 32px;
+}
+
+.add-section h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px; font-weight: 400; margin-bottom: 16px;
+}
+
+.form-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 16px;
+}
+
+.form-field label {
+  display: block; font-size: 11px; color: var(--text3);
+  margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.form-field input {
+  width: 100%; padding: 8px 12px; font-size: 14px;
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: 8px; color: var(--text); font-family: inherit;
+}
+
+.form-field input:focus {
+  outline: none; border-color: var(--green);
+}
+
+.form-field.full { grid-column: 1 / -1; }
+
+.btn {
+  padding: 10px 24px; border-radius: 8px; font-size: 13px;
+  font-weight: 500; cursor: pointer; border: none;
+  font-family: inherit; transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--green); color: #fff;
+}
+
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-danger {
+  background: transparent; color: var(--red);
+  border: 0.5px solid var(--red); margin-left: 8px;
+}
+
+.btn-danger:hover { background: var(--red); color: #fff; }
+
+.profiles-list {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+}
+
+.profile-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 20px; font-size: 12px;
+  background: var(--bg3); color: var(--text);
+}
+
+.profile-chip .remove {
+  cursor: pointer; opacity: 0.5; font-size: 14px;
+}
+
+.profile-chip .remove:hover { opacity: 1; }
+
+.stats-row {
+  display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1; min-width: 140px;
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 14px 18px; text-align: center;
+}
+
+.stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-val { font-size: 24px; font-weight: 600; margin-top: 4px; }
+.stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Philosophy Profile Network</h1>
+  <p class="subtitle">Centre-adjusted similarity analysis across philosophical dimensions</p>
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showPanel('network')">Network</button>
+    <button class="tab" onclick="showPanel('ranking')">Rankings</button>
+    <button class="tab" onclick="showPanel('radar')">Radar</button>
+    <button class="tab" onclick="showPanel('matrix')">Matrix</button>
+    <button class="tab" onclick="showPanel('method')">Method</button>
+  </div>
+
+  <div class="panel active" id="panel-network">
+    <div class="graph-container">
+      <div class="graph-controls">
+        <label>Min similarity to show label:
+          <input type="range" id="label-threshold" min="60" max="95" value="78" oninput="updateThresholdLabel(this.value); renderGraph()">
+          <span id="threshold-label">78%</span>
+        </label>
+        <label>Edge opacity boost:
+          <select id="edge-boost" onchange="renderGraph()">
+            <option value="normal">Normal</option>
+            <option value="strong">Show weak edges</option>
+            <option value="hide">Hide weak edges</option>
+          </select>
+        </label>
+      </div>
+      <svg id="graph" width="100%" viewBox="0 0 680 600"></svg>
+      <div class="legend-bar">
+        <span><span class="sw" style="width:32px;background:var(--blue)"></span> 95%+</span>
+        <span><span class="sw" style="width:32px;background:var(--green)"></span> 90–95</span>
+        <span><span class="sw" style="width:32px;background:var(--yellow)"></span> 80–90</span>
+        <span><span class="sw" style="width:32px;background:var(--coral)"></span> 70–80</span>
+        <span><span class="sw" style="width:32px;background:var(--red);opacity:0.4"></span> &lt;70</span>
+        <span style="margin-left:8px;color:var(--text3)">Thicker = more similar</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-ranking">
+    <div class="focus-select">
+      <span>Show similarity to:</span>
+      <select id="focus-person" onchange="renderRanking()"></select>
+    </div>
+    <div id="ranking-cards"></div>
+  </div>
+
+  <div class="panel" id="panel-radar">
+    <div class="radar-container">
+      <div style="position:relative;width:100%;height:400px;">
+        <canvas id="radar-chart"></canvas>
+      </div>
+      <div class="radar-legend" id="radar-legend"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-matrix">
+    <div class="matrix-wrap">
+      <table class="matrix" id="matrix-table"></table>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-method">
+    <div class="method-box">
+      <strong>Problem:</strong> Raw scores cluster around 50%. Two people at 48% and 52% look "very similar" even though one leans each way with little conviction. The distance metric needs to account for this.
+    </div>
+    <div class="method-box">
+      <strong>Step 1 — Power-curve stretching:</strong><br>
+      Each score is transformed: <code>adjusted = 50 + sign(d) × |d/50|^0.6 × 50</code> where <code>d = raw − 50</code>.<br><br>
+      The exponent 0.6 means small deviations near centre get amplified more than large ones. A 52% (barely leaning) stretches to ~58%. A 75% (strong conviction) stretches to ~83%. The further you already are from centre, the less additional stretching — you're already expressing a clear position.
+    </div>
+    <div class="method-box">
+      <strong>Step 2 — Similarity metric:</strong><br>
+      <code>similarity = 100 − mean(|adj_a − adj_b|)</code> across all 7 dimensions.<br><br>
+      Same formula as before, but the stretched inputs mean genuine differences produce larger gaps and centre-hugging "agreement" gets correctly downweighted.
+    </div>
+    <div class="method-box">
+      <strong>Stretch curve examples:</strong>
+      <div id="stretch-examples" style="margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <div class="add-section">
+    <h3>Manage profiles</h3>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Name</label>
+        <input type="text" id="inp-name" placeholder="e.g. Alex">
+      </div>
+      <div class="form-field">
+        <label>Materialism %</label>
+        <input type="number" id="inp-mat" min="0" max="100" step="0.1" placeholder="e.g. 24.2">
+      </div>
+      <div class="form-field">
+        <label>Egoism %</label>
+        <input type="number" id="inp-ego" min="0" max="100" step="0.1" placeholder="e.g. 32.6">
+      </div>
+      <div class="form-field">
+        <label>Idealism %</label>
+        <input type="number" id="inp-ide" min="0" max="100" step="0.1" placeholder="e.g. 57.8">
+      </div>
+      <div class="form-field">
+        <label>Hedonism %</label>
+        <input type="number" id="inp-hed" min="0" max="100" step="0.1" placeholder="e.g. 33.9">
+      </div>
+      <div class="form-field">
+        <label>Nihilism %</label>
+        <input type="number" id="inp-nih" min="0" max="100" step="0.1" placeholder="e.g. 31.7">
+      </div>
+      <div class="form-field">
+        <label>Rationalism %</label>
+        <input type="number" id="inp-rat" min="0" max="100" step="0.1" placeholder="e.g. 59.5">
+      </div>
+      <div class="form-field">
+        <label>Skepticism %</label>
+        <input type="number" id="inp-ske" min="0" max="100" step="0.1" placeholder="e.g. 45.8">
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addProfile()">Add profile</button>
+    <button class="btn btn-danger" onclick="resetProfiles()">Reset to defaults</button>
+    <div class="profiles-list" id="profiles-list"></div>
+  </div>
+</div>
+
+<script>
+const DIMS = ['Materialism','Egoism','Idealism','Hedonism','Nihilism','Rationalism','Skepticism'];
+const DEFAULT_COLORS = [
+  '#1D9E75','#7F77DD','#3B8BD4','#D85A30','#888780','#E24B4A',
+  '#639922','#D4537E','#0F6E56','#BA7517','#534AB7','#993556',
+  '#378ADD','#D85A30','#1D9E75','#888780','#E24B4A','#7F77DD'
+];
+
+const DEFAULT_PROFILES = {
+  Razon:     [24.2, 32.6, 57.8, 33.9, 31.7, 59.5, 45.8],
+  Sebby:     [30.0, 38.6, 60.9, 28.6, 38.3, 67.2, 47.9],
+  Marius:    [48.3, 27.3, 63.3, 36.6, 45.0, 59.5, 58.3],
+  Antton:    [60.0, 38.6, 68.0, 58.0, 63.3, 36.2, 68.8],
+  Speed:     [60.8, 47.0, 60.9, 42.9, 63.3, 52.6, 54.2],
+  Violet:    [60.8, 57.6, 35.2, 38.4, 69.2, 54.3, 81.3],
+  Mango:     [21.7, 15.2, 68.0, 52.7, 24.2, 15.5, 47.9],
+  Lilac:     [16.7, 23.5, 63.3, 28.6, 30.0, 47.4, 39.6],
+  Kanzoi:    [35.0, 49.2, 70.3, 40.2, 19.2, 61.2, 33.3],
+  Allmother: [52.5, 46.2, 64.8, 44.6, 46.7, 56.9, 52.1],
+  Julius:    [27.5, 25.8, 52.3, 19.6, 20.0, 53.4, 25.0],
+  Skillz:    [28.3, 28.0, 57.0, 37.5, 48.3, 30.2, 56.3]
+};
+
+let profiles = {};
+let names = [];
+let radarChart = null;
+
+function loadProfiles() {
+  const saved = localStorage.getItem('philo-profiles');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (Object.keys(parsed).length > 0) {
+      profiles = parsed;
+    } else {
+      profiles = JSON.parse(JSON.stringify(DEFAULT_PROFILES));
+    }
+  } else {
+    profiles = JSON.parse(JSON.stringify(DEFAULT_PROFILES));
+  }
+  names = Object.keys(profiles);
+}
+
+function saveProfiles() {
+  localStorage.setItem('philo-profiles', JSON.stringify(profiles));
+}
+
+function stretch(v) {
+  const d = v - 50;
+  const s = d >= 0 ? 1 : -1;
+  return 50 + s * Math.pow(Math.abs(d) / 50, 0.6) * 50;
+}
+
+function getAdj() {
+  const adj = {};
+  for (const [k, arr] of Object.entries(profiles)) {
+    adj[k] = arr.map(stretch);
+  }
+  return adj;
+}
+
+function sim(a, b) {
+  let sum = 0;
+  for (let i = 0; i < a.length; i++) sum += Math.abs(a[i] - b[i]);
+  return Math.ceil((100 - sum / a.length) * 10) / 10;
+}
+
+function getColor(i) { return DEFAULT_COLORS[i % DEFAULT_COLORS.length]; }
+
+function edgeColor(s) {
+  const r = Math.ceil(s);
+  if (r >= 95) return '#3B8BD4';
+  if (r >= 90) return '#1D9E75';
+  if (r >= 80) return '#EF9F27';
+  if (r >= 70) return '#D85A30';
+  return '#E24B4A';
+}
+
+function edgeWidth(s) { return Math.max(0.4, 0.4 + (s - 60) / 12); }
+
+function getAllPairs() {
+  const adj = getAdj();
+  const simMatrix = {};
+  const pairs = [];
+  for (let i = 0; i < names.length; i++) {
+    simMatrix[names[i]] = {};
+    for (let j = 0; j < names.length; j++) {
+      const s = i === j ? 100 : sim(adj[names[i]], adj[names[j]]);
+      simMatrix[names[i]][names[j]] = s;
+      if (j > i) pairs.push({ a: i, b: j, sim: s });
+    }
+  }
+  return { simMatrix, pairs: pairs.sort((a, b) => a.sim - b.sim) };
+}
+
+// --- PANELS ---
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'radar') renderRadar();
+}
+
+function updateThresholdLabel(v) {
+  document.getElementById('threshold-label').textContent = v + '%';
+}
+
+// --- NETWORK ---
+
+function renderGraph() {
+  const svg = document.getElementById('graph');
+  svg.innerHTML = '';
+  const threshold = parseInt(document.getElementById('label-threshold').value);
+  const boost = document.getElementById('edge-boost').value;
+  const { pairs } = getAllPairs();
+  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+
+  const n = names.length;
+  const cx = 340, cy = 295, radius = Math.min(225, 180 + n * 3);
+  const positions = names.map((_, i) => {
+    const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+    return { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
+  });
+
+  pairs.forEach(p => {
+    const pa = positions[p.a], pb = positions[p.b];
+    const col = edgeColor(p.sim);
+    const w = edgeWidth(p.sim);
+    const mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2;
+    const dx = pb.x - pa.x, dy = pb.y - pa.y;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const off = len * 0.06;
+    const nx = -dy / len * off, ny = dx / len * off;
+
+    let opacity = p.sim >= 80 ? 0.65 : p.sim >= 70 ? 0.3 : 0.1;
+    if (boost === 'strong') opacity = Math.max(opacity, 0.3);
+    if (boost === 'hide' && p.sim < 70) opacity = 0;
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M${pa.x} ${pa.y} Q${mx+nx} ${my+ny} ${pb.x} ${pb.y}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', col);
+    path.setAttribute('stroke-width', w);
+    path.setAttribute('opacity', opacity);
+    path.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(path);
+
+    if (p.sim >= threshold) {
+      const lx = mx + nx * 0.8, ly = my + ny * 0.8;
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', lx);
+      text.setAttribute('y', ly);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'central');
+      text.setAttribute('font-size', n > 10 ? '8' : '9');
+      text.setAttribute('fill', col);
+      text.setAttribute('font-weight', '500');
+      text.setAttribute('font-family', "'DM Sans', sans-serif");
+      text.textContent = Math.ceil(p.sim) + '%';
+      svg.appendChild(text);
+    }
+  });
+
+  positions.forEach((pos, i) => {
+    const c = getColor(i);
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', pos.x);
+    circle.setAttribute('cy', pos.y);
+    circle.setAttribute('r', n > 10 ? 18 : 22);
+    circle.setAttribute('fill', isDark ? c + '30' : c + '18');
+    circle.setAttribute('stroke', c);
+    circle.setAttribute('stroke-width', '2');
+    g.appendChild(circle);
+
+    const inner = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    inner.setAttribute('cx', pos.x);
+    inner.setAttribute('cy', pos.y);
+    inner.setAttribute('r', 3.5);
+    inner.setAttribute('fill', c);
+    g.appendChild(inner);
+
+    const angle = -Math.PI / 2 + (2 * Math.PI * i) / n;
+    const lDist = n > 10 ? 33 : 38;
+    const lx = pos.x + lDist * Math.cos(angle);
+    const ly = pos.y + lDist * Math.sin(angle);
+
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', lx);
+    text.setAttribute('y', ly);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('dominant-baseline', 'central');
+    text.setAttribute('font-size', n > 10 ? '11' : '13');
+    text.setAttribute('font-weight', '500');
+    text.setAttribute('fill', c);
+    text.setAttribute('font-family', "'DM Sans', sans-serif");
+    text.textContent = names[i];
+    g.appendChild(text);
+    svg.appendChild(g);
+  });
+}
+
+// --- RANKING ---
+
+function renderRanking() {
+  const focus = document.getElementById('focus-person').value;
+  const adj = getAdj();
+  const results = names
+    .filter(n => n !== focus)
+    .map(n => ({ name: n, sim: sim(adj[focus], adj[n]) }))
+    .sort((a, b) => b.sim - a.sim);
+
+  const container = document.getElementById('ranking-cards');
+  container.innerHTML = '';
+
+  results.forEach((r, i) => {
+    const rs = Math.ceil(r.sim);
+    const barColor = rs >= 95 ? 'var(--blue)' : rs >= 90 ? 'var(--green)' : rs >= 80 ? 'var(--yellow)' : rs >= 70 ? 'var(--coral)' : 'var(--red)';
+    // Find biggest agreeing and disagreeing dimensions
+    const focusAdj = adj[focus];
+    const otherAdj = adj[r.name];
+    let maxDiffDim = '', maxDiff = 0, minDiffDim = '', minDiff = 999;
+    DIMS.forEach((d, idx) => {
+      const diff = Math.abs(focusAdj[idx] - otherAdj[idx]);
+      if (diff > maxDiff) { maxDiff = diff; maxDiffDim = d; }
+      if (diff < minDiff) { minDiff = diff; minDiffDim = d; }
+    });
+
+    container.innerHTML += `
+      <div class="rank-card ${i === 0 ? 'top' : ''}">
+        <div class="num">${i + 1}</div>
+        <div class="info">
+          <div class="name">${r.name}</div>
+          <div class="detail">Closest on ${minDiffDim} (${Math.round(minDiff)}° apart) · Furthest on ${maxDiffDim} (${Math.round(maxDiff)}° apart)</div>
+        </div>
+        <div class="rank-bar-wrap">
+          <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${r.sim}%;background:${barColor}"></div></div>
+          <div class="rank-pct" style="color:${barColor}">${Math.ceil(r.sim)}%</div>
+        </div>
+      </div>`;
+  });
+}
+
+// --- RADAR ---
+
+function renderRadar() {
+  const adj = getAdj();
+  const ctx = document.getElementById('radar-chart');
+
+  if (radarChart) radarChart.destroy();
+
+  const datasets = names.map((name, i) => ({
+    label: name,
+    data: adj[name],
+    borderColor: getColor(i),
+    backgroundColor: getColor(i) + '08',
+    borderWidth: 1.5,
+    pointRadius: 2.5,
+    pointBackgroundColor: getColor(i)
+  }));
+
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: { labels: DIMS, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { r: {
+        beginAtZero: true, max: 100,
+        ticks: { stepSize: 25, font: { size: 10, family: "'DM Sans'" }, backdropColor: 'transparent' },
+        grid: { color: 'rgba(128,128,128,0.12)' },
+        pointLabels: { font: { size: 11, family: "'DM Sans'" } }
+      }},
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  const legendEl = document.getElementById('radar-legend');
+  legendEl.innerHTML = names.map((n, i) =>
+    `<span onclick="toggleRadarDataset(${i})" style="opacity:${radarChart.getDatasetMeta(i).hidden ? 0.4 : 1}">
+      <span class="dot" style="background:${getColor(i)}"></span>${n}
+    </span>`
+  ).join('');
+}
+
+function toggleRadarDataset(i) {
+  const meta = radarChart.getDatasetMeta(i);
+  meta.hidden = !meta.hidden;
+  radarChart.update();
+  const spans = document.querySelectorAll('#radar-legend > span');
+  spans[i].style.opacity = meta.hidden ? '0.4' : '1';
+}
+
+// --- MATRIX ---
+
+function renderMatrix() {
+  const { simMatrix } = getAllPairs();
+  const mt = document.getElementById('matrix-table');
+  let h = '<thead><tr><th></th>';
+  names.forEach((n, i) => h += `<th style="color:${getColor(i)}">${n.length > 6 ? n.slice(0,5) + '.' : n}</th>`);
+  h += '</tr></thead><tbody>';
+
+  // Find global max (non-self)
+  let globalMax = 0, globalMin = 100;
+  names.forEach(n => names.forEach(m => {
+    if (n !== m) {
+      const s = simMatrix[n][m];
+      if (s > globalMax) globalMax = s;
+      if (s < globalMin) globalMin = s;
+    }
+  }));
+
+  names.forEach((n, i) => {
+    h += `<tr><th style="text-align:left;font-weight:600;color:${getColor(i)};white-space:nowrap">${n}</th>`;
+    names.forEach((m, j) => {
+      const s = simMatrix[n][m];
+      if (i === j) {
+        h += '<td class="self">—</td>';
+      } else {
+        const col = edgeColor(s);
+        const cls = s >= globalMax - 1 ? ' highlight' : '';
+        h += `<td class="${cls}" style="color:${col};${s >= 85 ? 'font-weight:600;' : ''}">${Math.ceil(s)}</td>`;
+      }
+    });
+    h += '</tr>';
+  });
+  h += '</tbody>';
+  mt.innerHTML = h;
+}
+
+// --- STATS ---
+
+function renderStats() {
+  const { pairs } = getAllPairs();
+  const sims = pairs.map(p => p.sim);
+  const avg = Math.round(sims.reduce((a, b) => a + b, 0) / sims.length * 10) / 10;
+  const max = Math.max(...sims);
+  const min = Math.min(...sims);
+  const maxPair = pairs.find(p => p.sim === max);
+  const minPair = pairs.find(p => p.sim === min);
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Profiles</div>
+      <div class="stat-val">${names.length}</div>
+      <div class="stat-sub">${pairs.length} connections</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Most similar</div>
+      <div class="stat-val" style="color:var(--green)">${Math.ceil(max)}%</div>
+      <div class="stat-sub">${names[maxPair.a]} ↔ ${names[maxPair.b]}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Most different</div>
+      <div class="stat-val" style="color:var(--red)">${Math.ceil(min)}%</div>
+      <div class="stat-sub">${names[minPair.a]} ↔ ${names[minPair.b]}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Group average</div>
+      <div class="stat-val">${Math.ceil(avg)}%</div>
+      <div class="stat-sub">Mean similarity</div>
+    </div>`;
+}
+
+// --- PROFILES MANAGEMENT ---
+
+function renderProfileChips() {
+  const el = document.getElementById('profiles-list');
+  el.innerHTML = names.map((n, i) =>
+    `<span class="profile-chip">
+      <span style="color:${getColor(i)};font-weight:500">${n}</span>
+      <span class="remove" onclick="removeProfile('${n}')">&times;</span>
+    </span>`
+  ).join('');
+}
+
+function populateFocusSelect() {
+  const sel = document.getElementById('focus-person');
+  const prev = sel.value;
+  sel.innerHTML = names.map(n => `<option value="${n}" ${n === prev ? 'selected' : ''}>${n}</option>`).join('');
+  if (!names.includes(prev) && names.length) sel.value = names[0];
+}
+
+function addProfile() {
+  const name = document.getElementById('inp-name').value.trim();
+  if (!name) return alert('Please enter a name');
+  if (profiles[name]) return alert('Profile already exists');
+
+  const vals = ['mat','ego','ide','hed','nih','rat','ske'].map(id => {
+    const v = parseFloat(document.getElementById('inp-' + id).value);
+    if (isNaN(v) || v < 0 || v > 100) return null;
+    return v;
+  });
+
+  if (vals.includes(null)) return alert('Please fill in all dimensions (0–100)');
+
+  profiles[name] = vals;
+  saveProfiles();
+  names = Object.keys(profiles);
+  refreshAll();
+
+  // Clear inputs
+  document.getElementById('inp-name').value = '';
+  ['mat','ego','ide','hed','nih','rat','ske'].forEach(id => document.getElementById('inp-' + id).value = '');
+}
+
+function removeProfile(name) {
+  if (!confirm(`Remove ${name}?`)) return;
+  delete profiles[name];
+  saveProfiles();
+  names = Object.keys(profiles);
+  refreshAll();
+}
+
+function resetProfiles() {
+  if (!confirm('Reset to default profiles?')) return;
+  localStorage.removeItem('philo-profiles');
+  loadProfiles();
+  names = Object.keys(profiles);
+  refreshAll();
+}
+
+// --- STRETCH EXAMPLES ---
+
+function renderStretchExamples() {
+  const examples = [45, 48, 50, 52, 55, 60, 65, 70, 75, 80, 85, 90];
+  const el = document.getElementById('stretch-examples');
+  el.innerHTML = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">' +
+    examples.map(v => {
+      const s = Math.round(stretch(v) * 10) / 10;
+      const diff = Math.round((s - v) * 10) / 10;
+      const sign = diff >= 0 ? '+' : '';
+      return `<div style="background:var(--bg);border-radius:6px;padding:8px;text-align:center;">
+        <div style="font-size:16px;font-weight:500;">${v}%</div>
+        <div style="font-size:11px;color:var(--text3);">→ ${s}%</div>
+        <div style="font-size:10px;color:${Math.abs(diff) > 5 ? 'var(--coral)' : 'var(--text3)'}">${sign}${diff}</div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+// --- INIT ---
+
+function refreshAll() {
+  renderStats();
+  renderGraph();
+  renderMatrix();
+  populateFocusSelect();
+  renderRanking();
+  renderProfileChips();
+  renderStretchExamples();
+}
+
+loadProfiles();
+refreshAll();
+</script>
+</body>
+</html>
